@@ -87,11 +87,34 @@ export function PlanPage() {
     }
   }
 
-  function handleTogglePin(date: string, wardId: string) {
+  function handleCellPickFromA(date: string, doctorId: string, wardId: string | null) {
     if (!plan) return
-    const updated = plan.assignments.map((a) =>
-      a.date === date && a.wardId === wardId ? { ...a, pinned: !a.pinned } : a,
-    )
+    const updated = plan.assignments.map((a) => {
+      if (wardId === null) {
+        // unpin: clear whichever slot this doctor is in on this date
+        if (a.date === date && a.doctorId === doctorId) return { ...a, doctorId: null, pinned: false }
+        return a
+      }
+      if (a.date === date && a.wardId === wardId) return { ...a, doctorId, pinned: true }
+      // clear doctor from any other slot on same date to avoid double-booking
+      if (a.date === date && a.doctorId === doctorId) return { ...a, doctorId: null, pinned: false }
+      return a
+    })
+    void persist({ ...plan, assignments: updated })
+  }
+
+  function handleCellPickFromB(date: string, wardId: string, doctorId: string | null) {
+    if (!plan) return
+    const updated = plan.assignments.map((a) => {
+      if (doctorId === null) {
+        if (a.date === date && a.wardId === wardId) return { ...a, doctorId: null, pinned: false }
+        return a
+      }
+      if (a.date === date && a.wardId === wardId) return { ...a, doctorId, pinned: true }
+      // clear doctor from any other slot on same date to avoid double-booking
+      if (a.date === date && a.doctorId === doctorId) return { ...a, doctorId: null, pinned: false }
+      return a
+    })
     void persist({ ...plan, assignments: updated })
   }
 
@@ -132,8 +155,9 @@ export function PlanPage() {
   }
 
   async function handleMonthChange(year: number, month: number) {
-    if (!plan) return
-    await persist({ ...plan, year, month, assignments: [] })
+    if (!plan || !unit) return
+    const assignments = generateSlots(year, month, unit.wards.map((w) => w.id)).map((s) => ({ ...s, doctorId: null, pinned: false }))
+    await persist({ ...plan, year, month, assignments })
   }
 
   return (
@@ -179,10 +203,10 @@ export function PlanPage() {
           prefsEditMode={prefsEditMode}
           cellDisplay={cellDisplay}
           onPrefsChange={(updated) => void persist(updated)}
-          onTogglePin={handleTogglePin}
+          onCellPick={handleCellPickFromA}
         />
       ) : (
-        <AspectB plan={plan} unit={unit} />
+        <AspectB plan={plan} unit={unit} onCellPick={handleCellPickFromB} />
       )}
 
       {shareModalOpen && (

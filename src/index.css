@@ -22,7 +22,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .page { padding: 1rem 0; }
 .page-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
 .page-header h1 { flex: 1; font-size: 1.5rem; }
-.header-actions { display: flex; gap: 0.5rem; }
+.header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .page-loading { padding: 2rem; text-align: center; color: var(--text-muted); }
 
 /* Navbar */
@@ -158,6 +158,13 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .ward-cell { max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
 .doctor-name { display: block; }
 
+/* Cell picker popover */
+.cell-picker { position: fixed; z-index: 200; background: white; border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); max-height: 320px; overflow-y: auto; min-width: 180px; padding: 0.2rem 0; }
+.cell-picker ul { list-style: none; margin: 0; padding: 0; }
+.cell-picker li { padding: 0.35rem 0.75rem; cursor: pointer; font-size: 13px; white-space: nowrap; }
+.cell-picker li:hover { background: #f1f5f9; }
+.cell-picker li.unpin { border-bottom: 1px solid var(--border); color: var(--text-muted); }
+
 /* Setup wizard nav */
 .wizard-nav { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
 
@@ -168,9 +175,14 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 @media print {
   .no-print { display: none !important; }
   .print-header { display: block; text-align: center; margin-bottom: 0.5rem; font-size: 16px; font-weight: 700; }
-  .sticky-col { position: static; }
+  .sticky-col { position: static; min-width: 0; }
+  .sticky-col-2 { position: static; min-width: 0; }
   .grid-wrapper { overflow: visible; }
   .schedule-grid { font-size: 10px; }
+  .schedule-grid th, .schedule-grid td { padding: 1px 2px; }
+  .day-header { min-width: 22px; }
+  .doctor-cell { max-width: none; }
+  .ward-cell { max-width: none; }
   body { background: white; }
 }
 

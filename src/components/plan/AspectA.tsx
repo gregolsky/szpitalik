@@ -1,7 +1,9 @@
+import { useState, useRef } from 'react'
 import type { Plan, Unit, Assignment } from '@/types'
 import { DOCTOR_TYPE_EMOJI, getEffectiveMaxDuties } from '@/types'
 import { sortDoctorsByTypeAndName } from '@/utils/sort'
 import { daysInMonth, isWeekend } from '@/utils/date'
+import { CellPicker } from './CellPicker'
 
 type CellDisplay = 'abbrev' | 'emoji'
 
@@ -11,14 +13,14 @@ interface AspectAProps {
   prefsEditMode: boolean
   cellDisplay: CellDisplay
   onPrefsChange: (plan: Plan) => void
-  onTogglePin: (date: string, wardId: string) => void
+  onCellPick: (date: string, doctorId: string, wardId: string | null) => void
 }
 
 function isExcluded(plan: Plan, doctorId: string, date: string): boolean {
   return plan.exclusions.some((e) => e.doctorId === doctorId && e.date === date)
 }
 
-export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange, onTogglePin }: AspectAProps) {
+export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange, onCellPick }: AspectAProps) {
   const days = daysInMonth(plan.year, plan.month)
   const dayNums = Array.from({ length: days }, (_, i) => i + 1)
   const doctors = sortDoctorsByTypeAndName(unit.doctors)
@@ -33,12 +35,32 @@ export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange,
     if (a.doctorId) assignedByDoctorDate.set(`${a.doctorId}:${a.date}`, a)
   }
 
-  function handleCellClick(doctorId: string, date: string) {
-    if (!prefsEditMode) return
-    const excls = isExcluded(plan, doctorId, date)
-      ? plan.exclusions.filter((e) => !(e.doctorId === doctorId && e.date === date))
-      : [...plan.exclusions, { doctorId, date }]
-    onPrefsChange({ ...plan, exclusions: excls })
+  const [picker, setPicker] = useState<{ doctorId: string; date: string; anchor: DOMRect } | null>(null)
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function handleCellClick(e: React.MouseEvent, doctorId: string, date: string) {
+    if (prefsEditMode) {
+      const excls = isExcluded(plan, doctorId, date)
+        ? plan.exclusions.filter((ex) => !(ex.doctorId === doctorId && ex.date === date))
+        : [...plan.exclusions, { doctorId, date }]
+      onPrefsChange({ ...plan, exclusions: excls })
+      return
+    }
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current)
+    clickTimerRef.current = setTimeout(() => {
+      clickTimerRef.current = null
+      setPicker({ doctorId, date, anchor: rect })
+    }, 220)
+  }
+
+  function handleCellDoubleClick(doctorId: string, date: string) {
+    if (prefsEditMode) return
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current)
+      clickTimerRef.current = null
+    }
+    onCellPick(date, doctorId, null)
   }
 
   function handleRowBlock(doctorId: string) {
@@ -53,11 +75,6 @@ export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange,
     onPrefsChange({ ...plan, exclusions: excls })
   }
 
-  function handleRightClick(e: React.MouseEvent, date: string, wardId: string) {
-    e.preventDefault()
-    onTogglePin(date, wardId)
-  }
-
   function getCellContent(doctorId: string, date: string): React.ReactNode {
     if (prefsEditMode) {
       return isExcluded(plan, doctorId, date)
@@ -70,12 +87,17 @@ export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange,
     if (!ward) return null
     const display = cellDisplay === 'emoji' && ward.emoji ? ward.emoji : ward.abbrev
     return (
-      <span className={a.pinned ? 'cell-pinned' : ''} onContextMenu={(e) => handleRightClick(e, date, a.wardId)}>
+      <span className={a.pinned ? 'cell-pinned' : ''}>
         {a.pinned && <span className="pin-indicator" aria-label="Przypięty">📌</span>}
         {display}
       </span>
     )
   }
+
+  const wardOptions = unit.wards.map((w) => ({
+    id: w.id,
+    label: [w.emoji, w.name].filter(Boolean).join(' '),
+  }))
 
   return (
     <div className="grid-wrapper">
@@ -149,7 +171,8 @@ export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange,
                       excluded ? 'cell-exclude' : '',
                       assigned ? 'cell-assigned' : '',
                     ].filter(Boolean).join(' ')}
-                    onClick={() => handleCellClick(doc.id, date)}
+                    onClick={(e) => handleCellClick(e, doc.id, date)}
+                    onDoubleClick={() => handleCellDoubleClick(doc.id, date)}
                     aria-label={`${doc.lastName} ${d} ${plan.month}`}
                   >
                     {getCellContent(doc.id, date)}
@@ -160,6 +183,15 @@ export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange,
           ))}
         </tbody>
       </table>
+      {picker && (
+        <CellPicker
+          options={wardOptions}
+          anchorRect={picker.anchor}
+          onPick={(wardId) => { onCellPick(picker.date, picker.doctorId, wardId); setPicker(null) }}
+          onUnpin={assignedByDoctorDate.has(`${picker.doctorId}:${picker.date}`) ? () => { onCellPick(picker.date, picker.doctorId, null); setPicker(null) } : undefined}
+          onClose={() => setPicker(null)}
+        />
+      )}
     </div>
   )
 }

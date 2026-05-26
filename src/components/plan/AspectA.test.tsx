@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { AspectA } from './AspectA'
 import type { Plan, Unit } from '@/types'
 
@@ -31,7 +31,7 @@ describe('AspectA', () => {
   it('renders doctor rows sorted by type then lastName', () => {
     render(
       <AspectA plan={plan} unit={unit} prefsEditMode={false} cellDisplay="abbrev"
-        onPrefsChange={vi.fn()} onTogglePin={vi.fn()} />,
+        onPrefsChange={vi.fn()} onCellPick={vi.fn()} />,
     )
     const rows = screen.getAllByRole('row')
     expect(rows[1]?.textContent).toContain('Nowak')
@@ -41,7 +41,7 @@ describe('AspectA', () => {
   it('renders abbrev in view mode', () => {
     render(
       <AspectA plan={plan} unit={unit} prefsEditMode={false} cellDisplay="abbrev"
-        onPrefsChange={vi.fn()} onTogglePin={vi.fn()} />,
+        onPrefsChange={vi.fn()} onCellPick={vi.fn()} />,
     )
     expect(screen.getByText('OIOM')).toBeDefined()
     expect(screen.getByText('ANES')).toBeDefined()
@@ -50,7 +50,7 @@ describe('AspectA', () => {
   it('renders emoji in emoji mode', () => {
     render(
       <AspectA plan={plan} unit={unit} prefsEditMode={false} cellDisplay="emoji"
-        onPrefsChange={vi.fn()} onTogglePin={vi.fn()} />,
+        onPrefsChange={vi.fn()} onCellPick={vi.fn()} />,
     )
     expect(screen.getByText('🫁')).toBeDefined()
   })
@@ -59,7 +59,7 @@ describe('AspectA', () => {
     const onChange = vi.fn()
     const { rerender } = render(
       <AspectA plan={plan} unit={unit} prefsEditMode={true} cellDisplay="abbrev"
-        onPrefsChange={onChange} onTogglePin={vi.fn()} />,
+        onPrefsChange={onChange} onCellPick={vi.fn()} />,
     )
     const cells = screen.getAllByRole('cell')
     const firstDataCell = cells.find((c) => c.className.includes('schedule-cell'))!
@@ -71,7 +71,7 @@ describe('AspectA', () => {
 
     rerender(
       <AspectA plan={afterFirst} unit={unit} prefsEditMode={true} cellDisplay="abbrev"
-        onPrefsChange={onChange} onTogglePin={vi.fn()} />,
+        onPrefsChange={onChange} onCellPick={vi.fn()} />,
     )
 
     fireEvent.click(firstDataCell)
@@ -83,7 +83,7 @@ describe('AspectA', () => {
     const onChange = vi.fn()
     const { rerender } = render(
       <AspectA plan={plan} unit={unit} prefsEditMode={true} cellDisplay="abbrev"
-        onPrefsChange={onChange} onTogglePin={vi.fn()} />,
+        onPrefsChange={onChange} onCellPick={vi.fn()} />,
     )
     const blockBtns = screen.getAllByRole('button', { name: /zablokuj cały rząd/i })
     const firstBtn = blockBtns[0]!
@@ -95,11 +95,51 @@ describe('AspectA', () => {
 
     rerender(
       <AspectA plan={afterBlock} unit={unit} prefsEditMode={true} cellDisplay="abbrev"
-        onPrefsChange={onChange} onTogglePin={vi.fn()} />,
+        onPrefsChange={onChange} onCellPick={vi.fn()} />,
     )
     const unblockBtns = screen.getAllByRole('button', { name: /odblokuj cały rząd/i })
     fireEvent.click(unblockBtns[0]!)
     const afterUnblock = onChange.mock.calls[1]?.[0] as Plan
     expect(afterUnblock.exclusions.filter((e) => e.doctorId === 'd1').length).toBe(0)
+  })
+
+  it('single click in view mode opens ward picker after delay', () => {
+    vi.useFakeTimers()
+    render(
+      <AspectA plan={plan} unit={unit} prefsEditMode={false} cellDisplay="abbrev"
+        onPrefsChange={vi.fn()} onCellPick={vi.fn()} />,
+    )
+    const cells = screen.getAllByRole('cell')
+    const firstDataCell = cells.find((c) => c.className.includes('schedule-cell'))!
+
+    fireEvent.click(firstDataCell)
+    act(() => { vi.advanceTimersByTime(250) })
+
+    expect(screen.getByText('Odepnij')).toBeDefined()
+    // ward names appear in the picker list
+    expect(screen.getByText(/OIOM/, { selector: 'li' })).toBeDefined()
+    vi.useRealTimers()
+  })
+
+  it('double click in view mode calls onCellPick with null wardId', () => {
+    vi.useFakeTimers()
+    const onCellPick = vi.fn()
+    render(
+      <AspectA plan={plan} unit={unit} prefsEditMode={false} cellDisplay="abbrev"
+        onPrefsChange={vi.fn()} onCellPick={onCellPick} />,
+    )
+    const cells = screen.getAllByRole('cell')
+    const firstDataCell = cells.find((c) => c.className.includes('schedule-cell'))!
+
+    fireEvent.dblClick(firstDataCell)
+    act(() => { vi.advanceTimersByTime(250) })
+
+    expect(onCellPick).toHaveBeenCalledTimes(1)
+    const [date, doctorId, wardId] = onCellPick.mock.calls[0]!
+    expect(typeof date).toBe('string')
+    expect(typeof doctorId).toBe('string')
+    expect(wardId).toBeNull()
+    expect(screen.queryByText('Odepnij')).toBeNull()
+    vi.useRealTimers()
   })
 })

@@ -8,8 +8,8 @@ import { genId } from '@/utils/id'
 import { exportFullSnapshot, exportSinglePlan } from '@/io/exportJson'
 import { parseImportFile, readFileAsText } from '@/io/importJson'
 import { putUnit, putPlan } from '@/storage/db'
-import { decodeShareLink } from '@/crypto/share'
 import type { Plan, Unit } from '@/types'
+import { generateSlots } from '@/utils/date'
 
 export function HomePage() {
   const { units, loading: unitsLoading, deleteUnit, reload: reloadUnits } = useUnits()
@@ -25,10 +25,6 @@ export function HomePage() {
     unit: Unit
   } | null>(null)
   const [conflictLabel, setConflictLabel] = useState('')
-  const [shareToken, setShareToken] = useState('')
-  const [sharePassword, setSharePassword] = useState('')
-  const [shareError, setShareError] = useState('')
-  const [showShareImport, setShowShareImport] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const now = new Date()
@@ -49,14 +45,17 @@ export function HomePage() {
   }
 
   async function handleCreatePlan(unitId: string) {
+    const unit = units.find((u) => u.id === unitId)!
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1
     const plan: Plan = {
       id: genId(),
       unitId,
-      year: now.getFullYear(),
-      month: now.getMonth() + 1,
+      year,
+      month,
       label: null,
       exclusions: [],
-      assignments: [],
+      assignments: generateSlots(year, month, unit.wards.map((w) => w.id)).map((s) => ({ ...s, doctorId: null, pinned: false })),
       doctorMaxDuties: {},
     }
     await savePlan(plan)
@@ -112,22 +111,6 @@ export function HomePage() {
     setConflictLabel('')
   }
 
-  async function handleShareImport() {
-    setShareError('')
-    try {
-      const payload = await decodeShareLink(shareToken, sharePassword)
-      await putUnit(payload.unit)
-      await putPlan(payload.plan)
-      await reloadUnits()
-      await reloadPlans()
-      setShowShareImport(false)
-      setShareToken('')
-      setSharePassword('')
-    } catch {
-      setShareError('Nieprawidłowe hasło lub uszkodzony link')
-    }
-  }
-
   const loading = unitsLoading || plansLoading
 
   if (loading) return <div className="page-loading">Ładowanie…</div>
@@ -152,9 +135,6 @@ export function HomePage() {
               e.target.value = ''
             }}
           />
-          <button className="btn btn-secondary" onClick={() => setShowShareImport(true)}>
-            Otwórz link
-          </button>
         </div>
       </div>
 
@@ -270,39 +250,6 @@ export function HomePage() {
               placeholder="np. Wersja 2"
             />
           </div>
-        </Modal>
-      )}
-
-      {showShareImport && (
-        <Modal
-          title="Otwórz zaszyfrowany link"
-          onClose={() => setShowShareImport(false)}
-          footer={
-            <>
-              <button className="btn btn-secondary" onClick={() => setShowShareImport(false)}>Anuluj</button>
-              <button className="btn btn-primary" onClick={() => void handleShareImport()}>Importuj</button>
-            </>
-          }
-        >
-          <div className="form-group">
-            <label>Token (część po #share= w linku)</label>
-            <input
-              className="form-input"
-              value={shareToken}
-              onChange={(e) => setShareToken(e.target.value)}
-              placeholder="Wklej token z linku"
-            />
-          </div>
-          <div className="form-group">
-            <label>Hasło</label>
-            <input
-              type="password"
-              className="form-input"
-              value={sharePassword}
-              onChange={(e) => setSharePassword(e.target.value)}
-            />
-          </div>
-          {shareError && <p className="error-msg">{shareError}</p>}
         </Modal>
       )}
     </div>
