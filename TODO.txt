@@ -1,1 +1,8 @@
+
+przypinanie i wybór konkretnego pionu jest niewygodne.
+
+na widoku aspekcie pionów po klinieciu w komórke pozwol wybrac lekarza z listy - to przypina go do danego slotu. na liście wyboru pierwsza powinna być opcja odepnij, podwójne klikniecie rowniez odpina
+
+na aspekcie przypisań klikeniecie w komorke pozwala wybrać pion z listy - to przypina lekarza z tego rzędu do danego slotu. na liście wyboru pierwsza powinna być opcja odepnij, podwójne klikniecie rowniez odpina
+
 usuń guzik Reguły z widoku planów, ma być tylko na widoku listy jednostek i jako tab  
