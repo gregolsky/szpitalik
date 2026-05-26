@@ -169,6 +169,19 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .ward-cell { max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
 .doctor-name { display: block; }
 
+/* Piony grid: vertical text, narrower day columns */
+.schedule-grid-piony .day-header { min-width: 26px; }
+.schedule-grid-piony .schedule-cell { height: auto; min-height: 80px; padding: 3px 2px; }
+.schedule-grid-piony .doctor-name {
+  display: inline-block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  font-size: 11px;
+  line-height: 1.2;
+}
+.schedule-grid-piony .pin-indicator { display: block; font-size: 9px; margin-bottom: 1px; }
+
 /* Cell picker popover */
 .cell-picker { position: fixed; z-index: 200; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); max-height: 320px; overflow-y: auto; min-width: 180px; padding: 0.2rem 0; }
 .cell-picker ul { list-style: none; margin: 0; padding: 0; }

@@ -50,7 +50,7 @@ export function AspectB({ plan, unit, onCellPick }: AspectBProps) {
 
   return (
     <div className="grid-wrapper">
-      <table className="schedule-grid" aria-label="Piony">
+      <table className="schedule-grid schedule-grid-piony" aria-label="Piony">
         <thead>
           <tr>
             <th className="header-cell sticky-col col-label">Pion</th>
