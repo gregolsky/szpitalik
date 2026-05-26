@@ -4,7 +4,7 @@ export function LandingPage() {
   return (
     <div className="landing">
       <div className="landing-hero">
-        <img src={`${import.meta.env.BASE_URL}hero.png`} alt="" className="landing-hero-img" />
+        <img src={`${import.meta.env.BASE_URL}hero.jpg`} alt="" className="landing-hero-img" />
         <div className="landing-hero-text">
           <h1>Szpitalik</h1>
           <p className="landing-tagline">Planowanie dyżurów lekarskich — szybko, lokalnie, bez chmury.</p>
