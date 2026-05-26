@@ -1,6 +1,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  color-scheme: light;
   --primary: #1e40af;
   --primary-hover: #1d3a99;
   --danger: #dc2626;
@@ -129,15 +130,21 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .progress-bar { height: 8px; background: var(--primary); border-radius: 4px; transition: width 0.3s; min-width: 4px; }
 .progress-label { font-size: 12px; color: var(--text-muted); flex: 1; }
 
+/* Plan page layout — fixed-height flex column so grid-wrapper scrolls internally */
+.plan-page { display: flex; flex-direction: column; height: calc(100dvh - 78px); padding: 0; }
+.plan-page .toolbar { position: static; margin-bottom: 0; flex-shrink: 0; }
+
 /* Schedule grid */
-.grid-wrapper { overflow-x: auto; }
+.grid-wrapper { overflow: auto; }
+.plan-page .grid-wrapper { flex: 1; }
 .schedule-grid { border-collapse: collapse; font-size: 12px; }
 .schedule-grid th, .schedule-grid td { border: 1px solid var(--border); padding: 2px 4px; white-space: nowrap; }
 .schedule-grid th { background: #f1f5f9; font-weight: 600; text-align: center; }
 .sticky-col { position: sticky; left: 0; background: white; z-index: 2; font-weight: 600; min-width: 120px; }
 .sticky-col-2 { position: sticky; left: 122px; background: white; z-index: 2; min-width: 52px; text-align: center; }
-.schedule-grid thead th.sticky-col { background: #f1f5f9; z-index: 3; }
-.schedule-grid thead th.sticky-col-2 { background: #f1f5f9; z-index: 3; }
+.schedule-grid thead th { position: sticky; top: 0; z-index: 3; }
+.schedule-grid thead th.sticky-col { background: #f1f5f9; z-index: 4; }
+.schedule-grid thead th.sticky-col-2 { background: #f1f5f9; z-index: 4; }
 .day-header { min-width: 40px; text-align: center; }
 .day-header.weekend { background: #fef3c7; }
 .schedule-cell { height: 28px; text-align: center; cursor: pointer; vertical-align: middle; }
@@ -147,8 +154,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .schedule-cell.cell-assigned { background: #f0f9ff; }
 .pref-cross { color: var(--danger); font-weight: 700; }
 .cell-pinned { background: #fef9c3; }
+.cell-selected { background: #dbeafe !important; outline: 2px solid var(--primary); outline-offset: -2px; }
 .pin-indicator { font-size: 10px; margin-right: 2px; }
-.doctor-cell { max-width: 140px; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px; }
+.doctor-cell { max-width: 140px; }
+.doctor-cell-inner { display: flex; align-items: center; gap: 4px; overflow: hidden; }
 .doctor-name-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row-block-btn { background: none; border: none; cursor: pointer; padding: 0 2px; font-size: 13px; line-height: 1; flex-shrink: 0; opacity: 0.7; }
 .row-block-btn:hover { opacity: 1; }
@@ -174,16 +183,33 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 /* Print styles */
 @media print {
   .no-print { display: none !important; }
-  .print-header { display: block; text-align: center; margin-bottom: 0.5rem; font-size: 16px; font-weight: 700; }
+  .main-content { max-width: none; padding: 0; }
+  .page { padding: 0; }
+  .plan-page { display: block; height: auto; }
+  .plan-page .toolbar { display: none; }
+  .plan-page .grid-wrapper { max-height: none; overflow: visible; }
+  .print-header { display: block; text-align: center; margin-bottom: 0.25rem; font-size: 14px; font-weight: 700; }
+  .schedule-grid thead th { position: static; }
   .sticky-col { position: static; min-width: 0; }
   .sticky-col-2 { position: static; min-width: 0; }
   .grid-wrapper { overflow: visible; }
-  .schedule-grid { font-size: 10px; }
-  .schedule-grid th, .schedule-grid td { padding: 1px 2px; }
-  .day-header { min-width: 22px; }
+  .schedule-grid { font-size: 10px; table-layout: fixed; width: 100%; }
+  .schedule-grid th, .schedule-grid td { padding: 1px 2px; overflow: hidden; text-overflow: ellipsis; }
+  .schedule-grid th.col-label { width: 70px; }
+  .schedule-grid th.col-maxduties { width: 24px; }
   .doctor-cell { max-width: none; }
   .ward-cell { max-width: none; }
   body { background: white; }
 }
 
 @page { size: landscape; margin: 1cm; }
+
+/* Landing page */
+.landing { padding: 2rem 1rem; }
+.landing-hero { display: flex; flex-wrap: wrap; gap: 2rem; align-items: center; max-width: 1100px; margin: 0 auto; }
+.landing-hero-img { flex: 1 1 320px; max-width: 520px; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+.landing-hero-text { flex: 1 1 320px; }
+.landing-hero-text h1 { font-size: 2.5rem; margin-bottom: 0.75rem; color: var(--primary); }
+.landing-tagline { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.75rem; }
+.landing-sub { color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5; }
+.btn-lg { padding: 0.7rem 1.4rem; font-size: 15px; }

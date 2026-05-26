@@ -104,8 +104,8 @@ export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange,
       <table className="schedule-grid" aria-label="Przypisania">
         <thead>
           <tr>
-            <th className="header-cell sticky-col">Lekarz</th>
-            <th className="header-cell sticky-col sticky-col-2">Max dni</th>
+            <th className="header-cell sticky-col col-label">Lekarz</th>
+            <th className="header-cell col-maxduties">Max dni</th>
             {dayNums.map((d) => (
               <th key={d} className={['day-header', isWeekend(plan.year, plan.month, d) ? 'weekend' : ''].filter(Boolean).join(' ')}>{d}</th>
             ))}
@@ -115,23 +115,25 @@ export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange,
           {doctors.map((doc) => (
             <tr key={doc.id}>
               <td className="doctor-cell sticky-col">
-                <span className="doctor-name-text">{DOCTOR_TYPE_EMOJI[doc.type]} {doc.lastName} {doc.firstName[0]}.</span>
-                {prefsEditMode && (() => {
-                  const allDates = dayNums.map((d) => `${plan.year}-${String(plan.month).padStart(2, '0')}-${String(d).padStart(2, '0')}`)
-                  const allBlocked = allDates.every((date) => isExcluded(plan, doc.id, date))
-                  return (
-                    <button
-                      className="row-block-btn"
-                      title={allBlocked ? 'Odblokuj cały rząd' : 'Zablokuj cały rząd'}
-                      aria-label={allBlocked ? 'Odblokuj cały rząd' : 'Zablokuj cały rząd'}
-                      onClick={() => handleRowBlock(doc.id)}
-                    >
-                      {allBlocked ? '🔓' : '🔒'}
-                    </button>
-                  )
-                })()}
+                <div className="doctor-cell-inner">
+                  <span className="doctor-name-text">{DOCTOR_TYPE_EMOJI[doc.type]} {doc.lastName} {doc.firstName[0]}.</span>
+                  {prefsEditMode && (() => {
+                    const allDates = dayNums.map((d) => `${plan.year}-${String(plan.month).padStart(2, '0')}-${String(d).padStart(2, '0')}`)
+                    const allBlocked = allDates.every((date) => isExcluded(plan, doc.id, date))
+                    return (
+                      <button
+                        className="row-block-btn"
+                        title={allBlocked ? 'Odblokuj cały rząd' : 'Zablokuj cały rząd'}
+                        aria-label={allBlocked ? 'Odblokuj cały rząd' : 'Zablokuj cały rząd'}
+                        onClick={() => handleRowBlock(doc.id)}
+                      >
+                        {allBlocked ? '🔓' : '🔒'}
+                      </button>
+                    )
+                  })()}
+                </div>
               </td>
-              <td className="max-duties-cell sticky-col sticky-col-2">
+              <td className="max-duties-cell">
                 {prefsEditMode ? (
                   <input
                     type="number"
@@ -170,6 +172,7 @@ export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange,
                       prefsEditMode ? 'cell-edit-mode' : '',
                       excluded ? 'cell-exclude' : '',
                       assigned ? 'cell-assigned' : '',
+                      picker?.doctorId === doc.id && picker?.date === date ? 'cell-selected' : '',
                     ].filter(Boolean).join(' ')}
                     onClick={(e) => handleCellClick(e, doc.id, date)}
                     onDoubleClick={() => handleCellDoubleClick(doc.id, date)}

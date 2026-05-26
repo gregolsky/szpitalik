@@ -69,7 +69,7 @@ export function SetupPage() {
     if (idx < TABS.length - 1) {
       setActiveTab(TABS[idx + 1]!.key)
     } else {
-      void handleSave().then(() => navigate('/'))
+      void handleSave().then(() => navigate('/jednostki'))
     }
   }
 
@@ -86,7 +86,7 @@ export function SetupPage() {
       <div className="page-header">
         <h1>{isNew ? 'Nowa jednostka' : `Edycja: ${draft.name || '…'}`}</h1>
         {!isNew && (
-          <button className="btn btn-secondary" onClick={() => navigate('/')}>← Powrót</button>
+          <button className="btn btn-secondary" onClick={() => navigate('/jednostki')}>← Powrót</button>
         )}
       </div>
 

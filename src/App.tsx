@@ -1,5 +1,6 @@
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { NavBar } from '@/components/nav/NavBar'
+import { LandingPage } from '@/routes/LandingPage'
 import { HomePage } from '@/routes/HomePage'
 import { SetupPage } from '@/routes/SetupPage'
 import { PlanPage } from '@/routes/PlanPage'
@@ -16,7 +17,8 @@ export default function App() {
           <NavBar />
           <main className="main-content">
             <Routes>
-              <Route path="/" element={<HomePage />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/jednostki" element={<HomePage />} />
               <Route path="/setup/:unitId" element={<SetupPage />} />
               <Route path="/plan/:planId" element={<PlanPage />} />
             </Routes>

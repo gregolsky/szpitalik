@@ -53,7 +53,7 @@ export function AspectB({ plan, unit, onCellPick }: AspectBProps) {
       <table className="schedule-grid" aria-label="Piony">
         <thead>
           <tr>
-            <th className="header-cell sticky-col">Pion</th>
+            <th className="header-cell sticky-col col-label">Pion</th>
             {dayNums.map((d) => (
               <th key={d} className={['day-header', isWeekend(plan.year, plan.month, d) ? 'weekend' : ''].filter(Boolean).join(' ')}>{d}</th>
             ))}
@@ -71,7 +71,7 @@ export function AspectB({ plan, unit, onCellPick }: AspectBProps) {
                 return (
                   <td
                     key={d}
-                    className={['schedule-cell', isWeekend(plan.year, plan.month, d) ? 'weekend' : ''].filter(Boolean).join(' ')}
+                    className={['schedule-cell', isWeekend(plan.year, plan.month, d) ? 'weekend' : '', picker?.wardId === ward.id && picker?.date === date ? 'cell-selected' : ''].filter(Boolean).join(' ')}
                     aria-label={`${ward.name} ${d}`}
                     onClick={(e) => handleCellClick(e, ward.id, date, !!assignment?.doctorId)}
                     onDoubleClick={() => handleCellDoubleClick(ward.id, date)}

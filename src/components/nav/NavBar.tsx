@@ -11,7 +11,7 @@ export function NavBar() {
         </Link>
       </div>
       <div className="navbar-links">
-        <Link to="/" className={location.pathname === '/' ? 'nav-link active' : 'nav-link'}>
+        <Link to="/jednostki" className={location.pathname.startsWith('/jednostki') ? 'nav-link active' : 'nav-link'}>
           Jednostki
         </Link>
       </div>

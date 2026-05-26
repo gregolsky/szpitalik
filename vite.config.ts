@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 export default defineConfig({
-  base: '/szpitalik/',
+  base: '/doctor-doctor/',
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
@@ -25,7 +25,7 @@ export default defineConfig({
         theme_color: '#1e40af',
         background_color: '#ffffff',
         display: 'standalone',
-        start_url: '/szpitalik/',
+        start_url: '/doctor-doctor/',
         icons: [
           {
             src: 'icons/icon-192.png',
