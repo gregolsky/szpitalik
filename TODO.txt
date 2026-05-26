@@ -1,0 +1,1 @@
+usuń guzik Reguły z widoku planów, ma być tylko na widoku listy jednostek i jako tab  
