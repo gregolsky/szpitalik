@@ -19,8 +19,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icons/*.png'],
       manifest: {
-        name: 'Planer Dyżurów Szpitalnych',
-        short_name: 'Dyżury',
+        name: 'Doctor Doctor',
+        short_name: 'Doctor Doctor',
         description: 'Planowanie dyżurów lekarskich',
         theme_color: '#1e40af',
         background_color: '#ffffff',

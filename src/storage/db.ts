@@ -2,9 +2,9 @@ import { openDB, type IDBPDatabase } from 'idb'
 import type { Unit, Plan } from '@/types'
 import { SCHEMA_VERSION } from '@/types'
 
-const DB_NAME = 'szpitalik'
+const DB_NAME = 'doctor-doctor'
 const DB_VERSION = 1
-const SCHEMA_KEY = 'szpitalik_schema_v'
+const SCHEMA_KEY = 'doctor-doctor_schema_v'
 
 let dbPromise: Promise<IDBPDatabase> | null = null
 
