@@ -1,9 +1,8 @@
 import type { Plan, Unit, Assignment } from '@/types'
-import { DOCTOR_TYPE_EMOJI } from '@/types'
-import { sortDoctorsByLastName } from '@/utils/sort'
-import { daysInMonth } from '@/utils/date'
+import { DOCTOR_TYPE_EMOJI, getEffectiveMaxDuties } from '@/types'
+import { sortDoctorsByTypeAndName } from '@/utils/sort'
+import { daysInMonth, isWeekend } from '@/utils/date'
 
-type PrefState = 'none' | 'prefer' | 'exclude'
 type CellDisplay = 'abbrev' | 'emoji'
 
 interface AspectAProps {
@@ -15,22 +14,14 @@ interface AspectAProps {
   onTogglePin: (date: string, wardId: string) => void
 }
 
-function getPrefState(plan: Plan, doctorId: string, date: string): PrefState {
-  if (plan.exclusions.some((e) => e.doctorId === doctorId && e.date === date)) return 'exclude'
-  if (plan.preferences.some((e) => e.doctorId === doctorId && e.date === date)) return 'prefer'
-  return 'none'
-}
-
-function nextPrefState(state: PrefState): PrefState {
-  if (state === 'none') return 'prefer'
-  if (state === 'prefer') return 'exclude'
-  return 'none'
+function isExcluded(plan: Plan, doctorId: string, date: string): boolean {
+  return plan.exclusions.some((e) => e.doctorId === doctorId && e.date === date)
 }
 
 export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange, onTogglePin }: AspectAProps) {
   const days = daysInMonth(plan.year, plan.month)
   const dayNums = Array.from({ length: days }, (_, i) => i + 1)
-  const doctors = sortDoctorsByLastName(unit.doctors)
+  const doctors = sortDoctorsByTypeAndName(unit.doctors)
 
   const assignmentMap = new Map<string, Assignment>()
   for (const a of plan.assignments) {
@@ -44,13 +35,22 @@ export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange,
 
   function handleCellClick(doctorId: string, date: string) {
     if (!prefsEditMode) return
-    const current = getPrefState(plan, doctorId, date)
-    const next = nextPrefState(current)
-    let prefs = plan.preferences.filter((e) => !(e.doctorId === doctorId && e.date === date))
-    let excls = plan.exclusions.filter((e) => !(e.doctorId === doctorId && e.date === date))
-    if (next === 'prefer') prefs = [...prefs, { doctorId, date }]
-    if (next === 'exclude') excls = [...excls, { doctorId, date }]
-    onPrefsChange({ ...plan, preferences: prefs, exclusions: excls })
+    const excls = isExcluded(plan, doctorId, date)
+      ? plan.exclusions.filter((e) => !(e.doctorId === doctorId && e.date === date))
+      : [...plan.exclusions, { doctorId, date }]
+    onPrefsChange({ ...plan, exclusions: excls })
+  }
+
+  function handleRowBlock(doctorId: string) {
+    const allDates = dayNums.map((d) => `${plan.year}-${String(plan.month).padStart(2, '0')}-${String(d).padStart(2, '0')}`)
+    const allBlocked = allDates.every((date) => isExcluded(plan, doctorId, date))
+    const excls = allBlocked
+      ? plan.exclusions.filter((e) => e.doctorId !== doctorId)
+      : [
+          ...plan.exclusions.filter((e) => e.doctorId !== doctorId),
+          ...allDates.map((date) => ({ doctorId, date })),
+        ]
+    onPrefsChange({ ...plan, exclusions: excls })
   }
 
   function handleRightClick(e: React.MouseEvent, date: string, wardId: string) {
@@ -60,10 +60,9 @@ export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange,
 
   function getCellContent(doctorId: string, date: string): React.ReactNode {
     if (prefsEditMode) {
-      const state = getPrefState(plan, doctorId, date)
-      if (state === 'prefer') return <span className="pref-check" aria-label="Preferowany">✓</span>
-      if (state === 'exclude') return <span className="pref-cross" aria-label="Wykluczony">✗</span>
-      return null
+      return isExcluded(plan, doctorId, date)
+        ? <span className="pref-cross" aria-label="Wykluczony">✗</span>
+        : null
     }
     const a = assignedByDoctorDate.get(`${doctorId}:${date}`)
     if (!a) return null
@@ -84,8 +83,9 @@ export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange,
         <thead>
           <tr>
             <th className="header-cell sticky-col">Lekarz</th>
+            <th className="header-cell sticky-col sticky-col-2">Max dni</th>
             {dayNums.map((d) => (
-              <th key={d} className="day-header">{d}</th>
+              <th key={d} className={['day-header', isWeekend(plan.year, plan.month, d) ? 'weekend' : ''].filter(Boolean).join(' ')}>{d}</th>
             ))}
           </tr>
         </thead>
@@ -93,20 +93,60 @@ export function AspectA({ plan, unit, prefsEditMode, cellDisplay, onPrefsChange,
           {doctors.map((doc) => (
             <tr key={doc.id}>
               <td className="doctor-cell sticky-col">
-                {DOCTOR_TYPE_EMOJI[doc.type]} {doc.lastName} {doc.firstName[0]}.
+                <span className="doctor-name-text">{DOCTOR_TYPE_EMOJI[doc.type]} {doc.lastName} {doc.firstName[0]}.</span>
+                {prefsEditMode && (() => {
+                  const allDates = dayNums.map((d) => `${plan.year}-${String(plan.month).padStart(2, '0')}-${String(d).padStart(2, '0')}`)
+                  const allBlocked = allDates.every((date) => isExcluded(plan, doc.id, date))
+                  return (
+                    <button
+                      className="row-block-btn"
+                      title={allBlocked ? 'Odblokuj cały rząd' : 'Zablokuj cały rząd'}
+                      aria-label={allBlocked ? 'Odblokuj cały rząd' : 'Zablokuj cały rząd'}
+                      onClick={() => handleRowBlock(doc.id)}
+                    >
+                      {allBlocked ? '🔓' : '🔒'}
+                    </button>
+                  )
+                })()}
+              </td>
+              <td className="max-duties-cell sticky-col sticky-col-2">
+                {prefsEditMode ? (
+                  <input
+                    type="number"
+                    min={0}
+                    max={31}
+                    className="max-duties-input"
+                    value={plan.doctorMaxDuties[doc.id] ?? unit.defaultMaxDuties}
+                    onChange={(e) => {
+                      const v = parseInt(e.target.value, 10)
+                      if (!Number.isInteger(v) || v < 0 || v > 31) return
+                      const overrides = { ...plan.doctorMaxDuties }
+                      if (v === unit.defaultMaxDuties) {
+                        delete overrides[doc.id]
+                      } else {
+                        overrides[doc.id] = v
+                      }
+                      onPrefsChange({ ...plan, doctorMaxDuties: overrides })
+                    }}
+                  />
+                ) : (
+                  getEffectiveMaxDuties(plan, unit, doc.id) === 0
+                    ? <span title="Nie dyżuruje">🚫</span>
+                    : getEffectiveMaxDuties(plan, unit, doc.id)
+                )}
               </td>
               {dayNums.map((d) => {
                 const date = `${plan.year}-${String(plan.month).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-                const prefState = prefsEditMode ? getPrefState(plan, doc.id, date) : 'none'
+                const excluded = prefsEditMode && isExcluded(plan, doc.id, date)
                 const assigned = !prefsEditMode && assignedByDoctorDate.has(`${doc.id}:${date}`)
                 return (
                   <td
                     key={d}
                     className={[
                       'schedule-cell',
+                      isWeekend(plan.year, plan.month, d) ? 'weekend' : '',
                       prefsEditMode ? 'cell-edit-mode' : '',
-                      prefState === 'prefer' ? 'cell-prefer' : '',
-                      prefState === 'exclude' ? 'cell-exclude' : '',
+                      excluded ? 'cell-exclude' : '',
                       assigned ? 'cell-assigned' : '',
                     ].filter(Boolean).join(' ')}
                     onClick={() => handleCellClick(doc.id, date)}

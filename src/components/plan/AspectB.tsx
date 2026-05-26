@@ -1,5 +1,5 @@
 import type { Plan, Unit } from '@/types'
-import { daysInMonth } from '@/utils/date'
+import { daysInMonth, isWeekend } from '@/utils/date'
 
 interface AspectBProps {
   plan: Plan
@@ -24,7 +24,7 @@ export function AspectB({ plan, unit }: AspectBProps) {
           <tr>
             <th className="header-cell sticky-col">Pion</th>
             {dayNums.map((d) => (
-              <th key={d} className="day-header">{d}</th>
+              <th key={d} className={['day-header', isWeekend(plan.year, plan.month, d) ? 'weekend' : ''].filter(Boolean).join(' ')}>{d}</th>
             ))}
           </tr>
         </thead>
@@ -38,7 +38,7 @@ export function AspectB({ plan, unit }: AspectBProps) {
                 const date = `${plan.year}-${String(plan.month).padStart(2, '0')}-${String(d).padStart(2, '0')}`
                 const assignment = plan.assignments.find((a) => a.date === date && a.wardId === ward.id)
                 return (
-                  <td key={d} className="schedule-cell" aria-label={`${ward.name} ${d}`}>
+                  <td key={d} className={['schedule-cell', isWeekend(plan.year, plan.month, d) ? 'weekend' : ''].filter(Boolean).join(' ')} aria-label={`${ward.name} ${d}`}>
                     {assignment?.doctorId ? (
                       <span className="doctor-name">{getDoctorName(assignment.doctorId)}</span>
                     ) : null}

@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "type": "full_snapshot",
+  "unit": {
+    "id": "a1b2c3d4-0001-0000-0000-000000000001",
+    "name": "Szpital na peryferiach",
+    "defaultMaxDuties": 6,
+    "allowConsecutiveDuties": false,
+    "wards": [
+      {
+        "id": "w0000-0000-0000-0000-000000000001",
+        "name": "OIOM",
+        "abbrev": "OIOM",
+        "emoji": "🫁",
+        "allowedDoctorTypes": [
+          "specialist"
+        ]
+      },
+      {
+        "id": "w0000-0000-0000-0000-000000000002",
+        "name": "Anestezjologia",
+        "abbrev": "ANES",
+        "emoji": "💉",
+        "allowedDoctorTypes": [
+          "specialist",
+          "resident"
+        ]
+      },
+      {
+        "id": "w0000-0000-0000-0000-000000000003",
+        "name": "Sala pooperacyjna",
+        "abbrev": "POOP",
+        "emoji": "🛏️",
+        "allowedDoctorTypes": [
+          "specialist",
+          "senior_resident"
+        ]
+      }
+    ],
+    "doctors": [
+      {
+        "id": "d000-0001",
+        "firstName": "Marek",
+        "lastName": "Kowalski",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0002",
+        "firstName": "Anna",
+        "lastName": "Nowak",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0003",
+        "firstName": "Piotr",
+        "lastName": "Wiśniewski",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0004",
+        "firstName": "Katarzyna",
+        "lastName": "Wójcik",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0005",
+        "firstName": "Tomasz",
+        "lastName": "Kowalczyk",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0006",
+        "firstName": "Magdalena",
+        "lastName": "Kamińska",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0007",
+        "firstName": "Andrzej",
+        "lastName": "Lewandowski",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0008",
+        "firstName": "Joanna",
+        "lastName": "Zielińska",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0009",
+        "firstName": "Krzysztof",
+        "lastName": "Szymański",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0010",
+        "firstName": "Monika",
+        "lastName": "Woźniak",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0011",
+        "firstName": "Michał",
+        "lastName": "Dąbrowski",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0012",
+        "firstName": "Agnieszka",
+        "lastName": "Kozłowska",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0013",
+        "firstName": "Jacek",
+        "lastName": "Jankowski",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0014",
+        "firstName": "Ewa",
+        "lastName": "Mazur",
+        "type": "specialist"
+      },
+      {
+        "id": "d000-0015",
+        "firstName": "Bartłomiej",
+        "lastName": "Krawczyk",
+        "type": "senior_resident"
+      },
+      {
+        "id": "d000-0016",
+        "firstName": "Natalia",
+        "lastName": "Piotrowska",
+        "type": "senior_resident"
+      },
+      {
+        "id": "d000-0017",
+        "firstName": "Łukasz",
+        "lastName": "Grabowski",
+        "type": "senior_resident"
+      },
+      {
+        "id": "d000-0018",
+        "firstName": "Karolina",
+        "lastName": "Nowakowska",
+        "type": "senior_resident"
+      },
+      {
+        "id": "d000-0019",
+        "firstName": "Wojciech",
+        "lastName": "Adamczyk",
+        "type": "senior_resident"
+      },
+      {
+        "id": "d000-0020",
+        "firstName": "Aleksandra",
+        "lastName": "Pawłowska",
+        "type": "resident"
+      },
+      {
+        "id": "d000-0021",
+        "firstName": "Dominik",
+        "lastName": "Kubiak",
+        "type": "resident"
+      },
+      {
+        "id": "d000-0022",
+        "firstName": "Paulina",
+        "lastName": "Michalak",
+        "type": "resident"
+      },
+      {
+        "id": "d000-0023",
+        "firstName": "Sebastian",
+        "lastName": "Ostrowski",
+        "type": "resident"
+      },
+      {
+        "id": "d000-0024",
+        "firstName": "Marta",
+        "lastName": "Baran",
+        "type": "resident"
+      },
+      {
+        "id": "d000-0025",
+        "firstName": "Rafał",
+        "lastName": "Dudek",
+        "type": "resident"
+      },
+      {
+        "id": "d000-0026",
+        "firstName": "Weronika",
+        "lastName": "Majewska",
+        "type": "resident"
+      },
+      {
+        "id": "d000-0027",
+        "firstName": "Kamil",
+        "lastName": "Szewczyk",
+        "type": "resident"
+      }
+    ],
+    "rules": [
+      {
+        "kind": "daily_count",
+        "id": "r0000-0001",
+        "doctorType": "specialist",
+        "minCount": 1
+      }
+    ]
+  },
+  "plans": []
+}

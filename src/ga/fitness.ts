@@ -1,10 +1,12 @@
 import type { Assignment, Unit, Plan } from '@/types'
+import { getEffectiveMaxDuties } from '@/types'
 
 export const PENALTY = {
   HARD: 1000,
   SOFT: 10,
   DISTRIBUTION: 50,
   NULL_SLOT: 100,
+  MAX_DUTIES: 80,
 } as const
 
 export function exclusionPenalty(assignments: Assignment[], plan: Plan): number {
@@ -21,12 +23,9 @@ export function exclusionPenalty(assignments: Assignment[], plan: Plan): number 
 export function eligibilityPenalty(assignments: Assignment[], unit: Unit): number {
   let penalty = 0
   const eligibilityMap = new Map<string, Set<string>>()
-  for (const rule of unit.rules) {
-    if (rule.kind === 'ward_eligibility') {
-      const tag = unit.tags.find((t) => t.id === rule.tagId)
-      if (tag) {
-        eligibilityMap.set(rule.wardId, new Set(tag.allowedTypes))
-      }
+  for (const ward of unit.wards) {
+    if (ward.allowedDoctorTypes.length > 0) {
+      eligibilityMap.set(ward.id, new Set(ward.allowedDoctorTypes))
     }
   }
   for (const a of assignments) {
@@ -72,16 +71,6 @@ export function pinnedSlotPenalty(assignments: Assignment[], pinnedAssignments: 
   return penalty
 }
 
-export function preferencesPenalty(assignments: Assignment[], plan: Plan): number {
-  let penalty = 0
-  const assignedSet = new Set(assignments.filter((a) => a.doctorId).map((a) => `${a.doctorId}:${a.date}`))
-  for (const pref of plan.preferences) {
-    if (!assignedSet.has(`${pref.doctorId}:${pref.date}`)) {
-      penalty += PENALTY.SOFT
-    }
-  }
-  return penalty
-}
 
 export function dailyCountPenalty(assignments: Assignment[], unit: Unit): number {
   let penalty = 0
@@ -111,16 +100,55 @@ export function dailyCountPenalty(assignments: Assignment[], unit: Unit): number
   return penalty
 }
 
-export function distributionPenalty(assignments: Assignment[], unit: Unit): number {
+export function distributionPenalty(assignments: Assignment[], unit: Unit, plan: Plan): number {
+  // Skip doctors with explicit per-plan overrides — their asymmetry is intentional
+  const balanced = unit.doctors.filter((d) => !(d.id in plan.doctorMaxDuties))
+  if (balanced.length === 0) return 0
   const counts = new Map<string, number>()
-  for (const doc of unit.doctors) counts.set(doc.id, 0)
+  for (const doc of balanced) counts.set(doc.id, 0)
+  for (const a of assignments) {
+    if (a.doctorId && counts.has(a.doctorId)) {
+      counts.set(a.doctorId, (counts.get(a.doctorId) ?? 0) + 1)
+    }
+  }
+  const values = [...counts.values()]
+  const mean = values.reduce((s, v) => s + v, 0) / values.length
+  return values.reduce((sum, v) => sum + Math.abs(v - mean), 0) * PENALTY.DISTRIBUTION
+}
+
+export function maxDutiesPenalty(assignments: Assignment[], unit: Unit, plan: Plan): number {
+  let penalty = 0
+  const counts = new Map<string, number>()
   for (const a of assignments) {
     if (a.doctorId) counts.set(a.doctorId, (counts.get(a.doctorId) ?? 0) + 1)
   }
-  const values = [...counts.values()]
-  if (values.length === 0) return 0
-  const mean = values.reduce((s, v) => s + v, 0) / values.length
-  return values.reduce((sum, v) => sum + Math.abs(v - mean), 0) * PENALTY.DISTRIBUTION
+  for (const doc of unit.doctors) {
+    const cap = getEffectiveMaxDuties(plan, unit, doc.id)
+    const count = counts.get(doc.id) ?? 0
+    const excess = Math.max(0, count - cap)
+    penalty += excess * PENALTY.MAX_DUTIES
+  }
+  return penalty
+}
+
+export function consecutivePenalty(assignments: Assignment[], unit: Unit): number {
+  if (unit.allowConsecutiveDuties) return 0
+  const byDoctor = new Map<string, string[]>()
+  for (const a of assignments) {
+    if (!a.doctorId) continue
+    const dates = byDoctor.get(a.doctorId) ?? []
+    dates.push(a.date)
+    byDoctor.set(a.doctorId, dates)
+  }
+  let penalty = 0
+  for (const dates of byDoctor.values()) {
+    const sorted = dates.slice().sort()
+    for (let i = 1; i < sorted.length; i++) {
+      const diff = new Date(sorted[i]!).getTime() - new Date(sorted[i - 1]!).getTime()
+      if (diff === 86_400_000) penalty += PENALTY.HARD
+    }
+  }
+  return penalty
 }
 
 export function nullSlotPenalty(assignments: Assignment[]): number {
@@ -134,9 +162,10 @@ export function computeFitness(assignments: Assignment[], unit: Unit, plan: Plan
     eligibilityPenalty(assignments, unit) +
     doubleBookingPenalty(assignments) +
     pinnedSlotPenalty(assignments, pinned) +
-    preferencesPenalty(assignments, plan) +
     dailyCountPenalty(assignments, unit) +
-    distributionPenalty(assignments, unit) +
-    nullSlotPenalty(assignments)
+    distributionPenalty(assignments, unit, plan) +
+    nullSlotPenalty(assignments) +
+    maxDutiesPenalty(assignments, unit, plan) +
+    consecutivePenalty(assignments, unit)
   )
 }

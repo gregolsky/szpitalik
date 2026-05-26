@@ -1,24 +1,22 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import type { Unit } from '@/types'
 import { genId } from '@/utils/id'
 import { useUnits } from '@/state/UnitsContext'
 import { UnitTab } from '@/components/setup/UnitTab'
 import { WardsTab } from '@/components/setup/WardsTab'
 import { DoctorsTab } from '@/components/setup/DoctorsTab'
-import { TagsTab } from '@/components/setup/TagsTab'
 import { RulesTab } from '@/components/setup/RulesTab'
 
-type TabKey = 'unit' | 'wards' | 'doctors' | 'tags' | 'rules'
+type TabKey = 'unit' | 'wards' | 'doctors' | 'rules'
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'unit', label: 'Jednostka' },
   { key: 'wards', label: 'Piony' },
   { key: 'doctors', label: 'Lekarze' },
-  { key: 'tags', label: 'Tagi' },
   { key: 'rules', label: 'Reguły' },
 ]
 
-const EMPTY_UNIT: Unit = { id: '', name: '', wards: [], doctors: [], tags: [], rules: [] }
+const EMPTY_UNIT: Unit = { id: '', name: '', wards: [], doctors: [], rules: [], defaultMaxDuties: 6, allowConsecutiveDuties: false }
 
 function validateTab(tab: TabKey, unit: Partial<Unit>): string | null {
   if (tab === 'unit' && !unit.name?.trim()) return 'Nazwa jednostki jest wymagana'
@@ -31,10 +29,12 @@ export function SetupPage() {
   const { unitId } = useParams<{ unitId: string }>()
   const isNew = unitId === 'new'
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { units, createUnit, updateUnit } = useUnits()
 
   const [draft, setDraft] = useState<Unit>({ ...EMPTY_UNIT, id: genId() })
-  const [activeTab, setActiveTab] = useState<TabKey>('unit')
+  const initialTab = (searchParams.get('tab') as TabKey | null) ?? 'unit'
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab)
   const [tabError, setTabError] = useState<string | null>(null)
   const [globalErrors, setGlobalErrors] = useState<Record<string, string>>({})
   const [saved, setSaved] = useState(false)
@@ -113,11 +113,14 @@ export function SetupPage() {
         {activeTab === 'doctors' && (
           <DoctorsTab doctors={draft.doctors} onChange={(doctors) => patch({ doctors })} />
         )}
-        {activeTab === 'tags' && (
-          <TagsTab tags={draft.tags} onChange={(tags) => patch({ tags })} />
-        )}
         {activeTab === 'rules' && (
-          <RulesTab rules={draft.rules} wards={draft.wards} tags={draft.tags} onChange={(rules) => patch({ rules })} />
+          <RulesTab
+            rules={draft.rules}
+            defaultMaxDuties={draft.defaultMaxDuties}
+            allowConsecutiveDuties={draft.allowConsecutiveDuties}
+            onChange={(rules) => patch({ rules })}
+            onSettingsChange={(s) => patch(s)}
+          />
         )}
       </div>
 

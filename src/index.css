@@ -135,18 +135,26 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .schedule-grid th, .schedule-grid td { border: 1px solid var(--border); padding: 2px 4px; white-space: nowrap; }
 .schedule-grid th { background: #f1f5f9; font-weight: 600; text-align: center; }
 .sticky-col { position: sticky; left: 0; background: white; z-index: 2; font-weight: 600; min-width: 120px; }
+.sticky-col-2 { position: sticky; left: 122px; background: white; z-index: 2; min-width: 52px; text-align: center; }
 .schedule-grid thead th.sticky-col { background: #f1f5f9; z-index: 3; }
+.schedule-grid thead th.sticky-col-2 { background: #f1f5f9; z-index: 3; }
 .day-header { min-width: 40px; text-align: center; }
+.day-header.weekend { background: #fef3c7; }
 .schedule-cell { height: 28px; text-align: center; cursor: pointer; vertical-align: middle; }
+.schedule-cell.weekend { background: #fffbeb; }
 .schedule-cell.cell-edit-mode:hover { background: #eff6ff; }
-.cell-prefer { background: #dcfce7; }
-.cell-exclude { background: #fee2e2; }
-.cell-assigned { background: #f0f9ff; }
-.pref-check { color: var(--success); font-weight: 700; }
+.schedule-cell.cell-exclude { background: #fee2e2; }
+.schedule-cell.cell-assigned { background: #f0f9ff; }
 .pref-cross { color: var(--danger); font-weight: 700; }
 .cell-pinned { background: #fef9c3; }
 .pin-indicator { font-size: 10px; margin-right: 2px; }
-.doctor-cell { max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+.doctor-cell { max-width: 140px; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px; }
+.doctor-name-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-block-btn { background: none; border: none; cursor: pointer; padding: 0 2px; font-size: 13px; line-height: 1; flex-shrink: 0; opacity: 0.7; }
+.row-block-btn:hover { opacity: 1; }
+.max-duties-cell { text-align: center; font-size: 12px; }
+.max-duties-input { width: 40px; text-align: center; border: 1px solid var(--border); border-radius: 3px; font-size: 12px; padding: 1px 2px; -moz-appearance: textfield; }
+.max-duties-input::-webkit-inner-spin-button, .max-duties-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 .ward-cell { max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
 .doctor-name { display: block; }
 

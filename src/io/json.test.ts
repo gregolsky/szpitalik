@@ -5,12 +5,12 @@ import { SCHEMA_VERSION } from '@/types'
 import type { FullSnapshot, SinglePlanExport } from './exportJson'
 
 const makeUnit = (): Unit => ({
-  id: 'u1', name: 'Szpital', wards: [], doctors: [], tags: [], rules: [],
+  id: 'u1', name: 'Szpital', wards: [], doctors: [], rules: [], defaultMaxDuties: 6, allowConsecutiveDuties: false,
 })
 
 const makePlan = (): Plan => ({
   id: 'p1', unitId: 'u1', year: 2024, month: 3, label: 'Wersja 1',
-  preferences: [], exclusions: [],
+  exclusions: [], doctorMaxDuties: {},
   assignments: [{ date: '2024-03-01', wardId: 'w1', doctorId: 'd1', pinned: true }],
 })
 

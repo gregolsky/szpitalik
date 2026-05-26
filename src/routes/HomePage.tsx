@@ -55,9 +55,9 @@ export function HomePage() {
       year: now.getFullYear(),
       month: now.getMonth() + 1,
       label: null,
-      preferences: [],
       exclusions: [],
       assignments: [],
+      doctorMaxDuties: {},
     }
     await savePlan(plan)
     navigate(`/plan/${plan.id}`)

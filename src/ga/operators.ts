@@ -7,10 +7,9 @@ function eligibleDoctors(wardId: string, date: string, unit: Unit, plan: Plan, c
   )
 
   const eligibilityMap = new Map<string, Set<string>>()
-  for (const rule of unit.rules) {
-    if (rule.kind === 'ward_eligibility') {
-      const tag = unit.tags.find((t) => t.id === rule.tagId)
-      if (tag) eligibilityMap.set(rule.wardId, new Set(tag.allowedTypes))
+  for (const ward of unit.wards) {
+    if (ward.allowedDoctorTypes.length > 0) {
+      eligibilityMap.set(ward.id, new Set(ward.allowedDoctorTypes))
     }
   }
 

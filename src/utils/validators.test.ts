@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { validateWardAbbrev, validateTagAllowedTypes, validateRuleRefs } from './validators'
-import type { Tag, Unit } from '@/types'
+import { validateWardAbbrev, validateRuleRefs, validateMaxDutiesValue } from './validators'
+import type { Unit } from '@/types'
 
 describe('validateWardAbbrev', () => {
   it('accepts 2-4 uppercase letters', () => {
@@ -16,31 +16,22 @@ describe('validateWardAbbrev', () => {
   it('rejects empty', () => expect(validateWardAbbrev('')).toBe(false))
 })
 
-describe('validateTagAllowedTypes', () => {
-  const tag = (types: string[]): Tag => ({ id: '1', name: 'x', allowedTypes: types as Tag['allowedTypes'] })
-  it('accepts non-empty', () => expect(validateTagAllowedTypes(tag(['resident']))).toBe(true))
-  it('rejects empty', () => expect(validateTagAllowedTypes(tag([]))).toBe(false))
-})
-
 describe('validateRuleRefs', () => {
   const unit: Unit = {
-    id: 'u1', name: 'U', wards: [{ id: 'w1', name: 'W', abbrev: 'WW', emoji: null }],
-    doctors: [], tags: [{ id: 't1', name: 'T', allowedTypes: ['specialist'] }], rules: [],
+    id: 'u1', name: 'U', wards: [{ id: 'w1', name: 'W', abbrev: 'WW', emoji: null, allowedDoctorTypes: [] }],
+    doctors: [], rules: [], defaultMaxDuties: 6, allowConsecutiveDuties: false,
   }
-
-  it('passes when wardId and tagId exist', () => {
-    expect(validateRuleRefs({ kind: 'ward_eligibility', id: 'r1', wardId: 'w1', tagId: 't1' }, unit)).toBe(true)
-  })
-
-  it('fails when wardId missing', () => {
-    expect(validateRuleRefs({ kind: 'ward_eligibility', id: 'r1', wardId: 'bad', tagId: 't1' }, unit)).toBe(false)
-  })
-
-  it('fails when tagId missing', () => {
-    expect(validateRuleRefs({ kind: 'ward_eligibility', id: 'r1', wardId: 'w1', tagId: 'bad' }, unit)).toBe(false)
-  })
 
   it('daily_count rule always passes ref check', () => {
     expect(validateRuleRefs({ kind: 'daily_count', id: 'r1', doctorType: 'specialist', minCount: 1 }, unit)).toBe(true)
   })
+})
+
+describe('validateMaxDutiesValue', () => {
+  it('accepts 0', () => expect(validateMaxDutiesValue(0)).toBe(true))
+  it('accepts positive integer', () => expect(validateMaxDutiesValue(5)).toBe(true))
+  it('accepts 31', () => expect(validateMaxDutiesValue(31)).toBe(true))
+  it('rejects negative', () => expect(validateMaxDutiesValue(-1)).toBe(false))
+  it('rejects non-integer', () => expect(validateMaxDutiesValue(2.5)).toBe(false))
+  it('rejects above 31', () => expect(validateMaxDutiesValue(32)).toBe(false))
 })

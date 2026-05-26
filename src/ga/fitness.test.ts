@@ -4,9 +4,10 @@ import {
   eligibilityPenalty,
   doubleBookingPenalty,
   pinnedSlotPenalty,
-  preferencesPenalty,
   dailyCountPenalty,
   nullSlotPenalty,
+  maxDutiesPenalty,
+  consecutivePenalty,
   PENALTY,
 } from './fitness'
 import type { Assignment, Unit, Plan } from '@/types'
@@ -14,18 +15,19 @@ import type { Assignment, Unit, Plan } from '@/types'
 const makeUnit = (): Unit => ({
   id: 'u1',
   name: 'Test',
-  wards: [{ id: 'w1', name: 'Ward1', abbrev: 'WR1', emoji: null }],
+  wards: [{ id: 'w1', name: 'Ward1', abbrev: 'WR1', emoji: null, allowedDoctorTypes: ['specialist'] }],
   doctors: [
     { id: 'd1', firstName: 'Jan', lastName: 'Nowak', type: 'specialist' },
     { id: 'd2', firstName: 'Anna', lastName: 'Kowal', type: 'resident' },
   ],
-  tags: [{ id: 't1', name: 'spec', allowedTypes: ['specialist'] }],
-  rules: [{ kind: 'ward_eligibility', id: 'r1', wardId: 'w1', tagId: 't1' }],
+  rules: [],
+  defaultMaxDuties: 6,
+  allowConsecutiveDuties: false,
 })
 
 const makePlan = (): Plan => ({
   id: 'p1', unitId: 'u1', year: 2024, month: 1, label: null,
-  preferences: [], exclusions: [], assignments: [],
+  exclusions: [], assignments: [], doctorMaxDuties: {},
 })
 
 const makeAssignment = (doctorId: string, date: string, wardId = 'w1', pinned = false): Assignment => ({
@@ -92,19 +94,6 @@ describe('pinnedSlotPenalty', () => {
   })
 })
 
-describe('preferencesPenalty', () => {
-  it('penalises unmet preference', () => {
-    const plan = { ...makePlan(), preferences: [{ doctorId: 'd1', date: '2024-01-01' }] }
-    const a: Assignment[] = [{ date: '2024-01-01', wardId: 'w1', doctorId: 'd2', pinned: false }]
-    expect(preferencesPenalty(a, plan)).toBe(PENALTY.SOFT)
-  })
-
-  it('no penalty when preference met', () => {
-    const plan = { ...makePlan(), preferences: [{ doctorId: 'd1', date: '2024-01-01' }] }
-    const a: Assignment[] = [{ date: '2024-01-01', wardId: 'w1', doctorId: 'd1', pinned: false }]
-    expect(preferencesPenalty(a, plan)).toBe(0)
-  })
-})
 
 describe('dailyCountPenalty', () => {
   it('penalises missing daily count', () => {
@@ -126,5 +115,98 @@ describe('nullSlotPenalty', () => {
   it('no penalty when all filled', () => {
     const a: Assignment[] = [{ date: '2024-01-01', wardId: 'w1', doctorId: 'd1', pinned: false }]
     expect(nullSlotPenalty(a)).toBe(0)
+  })
+})
+
+describe('maxDutiesPenalty', () => {
+  const makeUnitAndPlan = (cap: number, doctorId = 'd1'): { unit: Unit; plan: Plan } => {
+    const unit: Unit = {
+      ...makeUnit(),
+      wards: [{ id: 'w1', name: 'Ward1', abbrev: 'WR1', emoji: null, allowedDoctorTypes: [] }],
+    }
+    const plan: Plan = { ...makePlan(), doctorMaxDuties: { [doctorId]: cap } }
+    return { unit, plan }
+  }
+
+  it('penalises each assignment over cap=0', () => {
+    const { unit, plan } = makeUnitAndPlan(0)
+    const a: Assignment[] = [
+      makeAssignment('d1', '2024-01-01'),
+      makeAssignment('d1', '2024-01-02'),
+      makeAssignment('d1', '2024-01-03'),
+    ]
+    expect(maxDutiesPenalty(a, unit, plan)).toBe(PENALTY.MAX_DUTIES * 3)
+  })
+
+  it('penalises only excess over positive cap', () => {
+    const { unit, plan } = makeUnitAndPlan(3)
+    const a: Assignment[] = [
+      makeAssignment('d1', '2024-01-01'),
+      makeAssignment('d1', '2024-01-02'),
+      makeAssignment('d1', '2024-01-03'),
+      makeAssignment('d1', '2024-01-04'),
+      makeAssignment('d1', '2024-01-05'),
+    ]
+    expect(maxDutiesPenalty(a, unit, plan)).toBe(PENALTY.MAX_DUTIES * 2)
+  })
+
+  it('no penalty when within cap', () => {
+    const { unit, plan } = makeUnitAndPlan(3)
+    const a: Assignment[] = [
+      makeAssignment('d1', '2024-01-01'),
+      makeAssignment('d1', '2024-01-02'),
+      makeAssignment('d1', '2024-01-03'),
+    ]
+    expect(maxDutiesPenalty(a, unit, plan)).toBe(0)
+  })
+
+  it('uses unit default when no override', () => {
+    const unit: Unit = { ...makeUnit(), defaultMaxDuties: 2 }
+    const plan: Plan = { ...makePlan(), doctorMaxDuties: {} }
+    const a: Assignment[] = [
+      makeAssignment('d1', '2024-01-01'),
+      makeAssignment('d1', '2024-01-02'),
+      makeAssignment('d1', '2024-01-03'),
+    ]
+    expect(maxDutiesPenalty(a, unit, plan)).toBe(PENALTY.MAX_DUTIES * 1)
+  })
+})
+
+describe('consecutivePenalty', () => {
+  it('penalises same doctor on consecutive days', () => {
+    const unit = makeUnit()
+    const a: Assignment[] = [
+      makeAssignment('d1', '2024-01-05'),
+      makeAssignment('d1', '2024-01-06'),
+    ]
+    expect(consecutivePenalty(a, unit)).toBe(PENALTY.HARD)
+  })
+
+  it('no penalty when allowConsecutiveDuties is true', () => {
+    const unit: Unit = { ...makeUnit(), allowConsecutiveDuties: true }
+    const a: Assignment[] = [
+      makeAssignment('d1', '2024-01-05'),
+      makeAssignment('d1', '2024-01-06'),
+    ]
+    expect(consecutivePenalty(a, unit)).toBe(0)
+  })
+
+  it('no penalty for non-consecutive days', () => {
+    const unit = makeUnit()
+    const a: Assignment[] = [
+      makeAssignment('d1', '2024-01-05'),
+      makeAssignment('d1', '2024-01-07'),
+    ]
+    expect(consecutivePenalty(a, unit)).toBe(0)
+  })
+
+  it('counts multiple pairs independently', () => {
+    const unit = makeUnit()
+    const a: Assignment[] = [
+      makeAssignment('d1', '2024-01-05'),
+      makeAssignment('d1', '2024-01-06'),
+      makeAssignment('d1', '2024-01-07'),
+    ]
+    expect(consecutivePenalty(a, unit)).toBe(PENALTY.HARD * 2)
   })
 })

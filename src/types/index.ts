@@ -7,8 +7,9 @@ export interface Unit {
   name: string
   wards: Ward[]
   doctors: Doctor[]
-  tags: Tag[]
   rules: Rule[]
+  defaultMaxDuties: number          // fallback cap per doctor; default 6
+  allowConsecutiveDuties: boolean   // if false, consecutive days are a hard violation
 }
 
 export interface Ward {
@@ -16,6 +17,7 @@ export interface Ward {
   name: string
   abbrev: string
   emoji: string | null
+  allowedDoctorTypes: DoctorType[]  // empty = any type allowed
 }
 
 export interface Doctor {
@@ -25,13 +27,7 @@ export interface Doctor {
   type: DoctorType
 }
 
-export interface Tag {
-  id: string
-  name: string
-  allowedTypes: DoctorType[]
-}
-
-export type Rule = DailyCountRule | WardEligibilityRule
+export type Rule = DailyCountRule
 
 export interface DailyCountRule {
   kind: 'daily_count'
@@ -40,22 +36,19 @@ export interface DailyCountRule {
   minCount: number
 }
 
-export interface WardEligibilityRule {
-  kind: 'ward_eligibility'
-  id: string
-  wardId: string
-  tagId: string
-}
-
 export interface Plan {
   id: string
   unitId: string
   year: number
   month: number
   label: string | null
-  preferences: DoctorDateEntry[]
   exclusions: DoctorDateEntry[]
   assignments: Assignment[]
+  doctorMaxDuties: Record<string, number>  // sparse overrides; absent = use unit.defaultMaxDuties
+}
+
+export function getEffectiveMaxDuties(plan: Plan, unit: Unit, doctorId: string): number {
+  return plan.doctorMaxDuties[doctorId] ?? unit.defaultMaxDuties
 }
 
 export interface DoctorDateEntry {

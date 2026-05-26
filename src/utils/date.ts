@@ -20,6 +20,11 @@ export function generateSlots(year: number, month: number, wardIds: string[]): A
   return slots
 }
 
+export function isWeekend(year: number, month: number, day: number): boolean {
+  const dow = new Date(year, month - 1, day).getDay()
+  return dow === 0 || dow === 6
+}
+
 export function monthLabel(year: number, month: number): string {
   const date = new Date(year, month - 1, 1)
   return date.toLocaleDateString('pl-PL', { year: 'numeric', month: 'long' })

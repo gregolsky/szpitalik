@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { MonthPicker } from './MonthPicker'
 import type { Plan, Unit } from '@/types'
 
@@ -26,7 +27,7 @@ interface ToolbarProps {
 
 export function Toolbar({
   plan,
-  unit: _unit,
+  unit,
   aspect,
   cellDisplay,
   prefsEditMode,
@@ -42,6 +43,7 @@ export function Toolbar({
   onPrint,
   onMonthChange,
 }: ToolbarProps) {
+  const navigate = useNavigate()
   const fileRef = useRef<HTMLInputElement>(null)
   const [exportOpen, setExportOpen] = useState(false)
 
@@ -96,14 +98,17 @@ export function Toolbar({
         {prefsEditMode ? '✏️ Tryb preferencji ON' : '✏️ Preferencje'}
       </button>
 
-      <div className="toolbar-sep" />
-
-      <button className="btn btn-success" onClick={onGenerate} disabled={gaRunning}>
-        {gaRunning ? '⏳ Generowanie…' : 'Generuj'}
-      </button>
-      <button className="btn btn-secondary" onClick={onRegenerate} disabled={gaRunning || plan.assignments.length === 0}>
-        Regeneruj
-      </button>
+      {!prefsEditMode && (
+        <>
+          <div className="toolbar-sep" />
+          <button className="btn btn-success" onClick={onGenerate} disabled={gaRunning}>
+            {gaRunning ? '⏳ Generowanie…' : 'Generuj'}
+          </button>
+          <button className="btn btn-secondary" onClick={onRegenerate} disabled={gaRunning || plan.assignments.length === 0}>
+            Regeneruj
+          </button>
+        </>
+      )}
 
       <div className="toolbar-sep" />
 
@@ -130,6 +135,12 @@ export function Toolbar({
 
       <button className="btn btn-secondary" onClick={onPrint}>
         Drukuj
+      </button>
+
+      <div className="toolbar-sep" />
+
+      <button className="btn btn-secondary" onClick={() => navigate(`/setup/${unit.id}?tab=rules`)}>
+        📋 Reguły
       </button>
     </div>
   )
