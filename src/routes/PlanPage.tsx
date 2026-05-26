@@ -8,6 +8,7 @@ import { Toolbar } from '@/components/plan/Toolbar'
 import { AspectA } from '@/components/plan/AspectA'
 import { AspectB } from '@/components/plan/AspectB'
 import { ProgressBar } from '@/components/plan/ProgressBar'
+import { ViolationsList } from '@/components/plan/ViolationsList'
 import { Modal } from '@/components/common/Modal'
 import { exportSinglePlan } from '@/io/exportJson'
 import { parseImportFile, readFileAsText } from '@/io/importJson'
@@ -120,12 +121,14 @@ export function PlanPage() {
 
   async function handleShareExport() {
     if (!plan || !unit) return
+    if (!sharePassword.trim()) { setShareError('Podaj hasło'); return }
     setShareError('')
     try {
       const token = await encodeShareLink(unit, plan, sharePassword)
       const url = `${window.location.origin}${window.location.pathname}#share=${token}`
       setShareLink(url)
     } catch (err) {
+      console.error('Share encode failed:', err)
       setShareError(String(err))
     }
   }
@@ -196,6 +199,8 @@ export function PlanPage() {
         <h2>{unit.name} — {plan.year}-{String(plan.month).padStart(2, '0')}{plan.label ? ` — ${plan.label}` : ''}</h2>
       </div>
 
+      {!printMode && <ViolationsList plan={plan} unit={unit} />}
+
       {aspect === 'A' ? (
         <AspectA
           plan={plan}
@@ -233,6 +238,7 @@ export function PlanPage() {
                   className="form-input"
                   value={sharePassword}
                   onChange={(e) => setSharePassword(e.target.value)}
+                  autoFocus
                 />
               </div>
               {shareError && <p className="error-msg">{shareError}</p>}

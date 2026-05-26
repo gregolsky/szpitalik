@@ -138,7 +138,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 /* Schedule grid */
 .grid-wrapper { overflow: auto; }
 .plan-page .grid-wrapper { flex: 1; }
-.schedule-grid { border-collapse: collapse; font-size: 12px; }
+.schedule-grid { border-collapse: collapse; font-size: 12px; width: 100%; }
 .schedule-grid th, .schedule-grid td { border: 1px solid var(--border); padding: 2px 4px; white-space: nowrap; }
 .schedule-grid th { background: var(--surface-alt); font-weight: 600; text-align: center; }
 .sticky-col { position: sticky; left: 0; background: var(--bg); z-index: 2; font-weight: 600; min-width: 120px; }
@@ -221,3 +221,14 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .landing-tagline { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.75rem; }
 .landing-sub { color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5; }
 .btn-lg { padding: 0.7rem 1.4rem; font-size: 15px; }
+
+/* Violations banner */
+.violations-banner { padding: 0.4rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 13px; flex-shrink: 0; }
+.violations-ok    { background: #052e16; color: #86efac; }
+.violations-warn  { background: #2d2400; color: #fde68a; }
+.violations-error { background: #3b0a0a; color: #fca5a5; }
+.violations-toggle { background: none; border: none; color: inherit; font-size: 13px; cursor: pointer; font-family: inherit; padding: 0; }
+.violations-list { margin: 0.4rem 0 0.1rem 1rem; list-style: none; max-height: 180px; overflow-y: auto; }
+.violations-list li { padding: 0.1rem 0; font-size: 12px; }
+.violation-hard { color: #fca5a5; }
+.violation-soft { color: #fde68a; }

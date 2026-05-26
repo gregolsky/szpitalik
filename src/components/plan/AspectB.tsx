@@ -23,7 +23,7 @@ export function AspectB({ plan, unit, onCellPick }: AspectBProps) {
     if (!doctorId) return ''
     const doc = unit.doctors.find((d) => d.id === doctorId)
     if (!doc) return '?'
-    return `${doc.lastName} ${doc.firstName[0]}.`
+    return `${DOCTOR_TYPE_EMOJI[doc.type]} ${doc.lastName} ${doc.firstName[0]}.`
   }
 
   function handleCellClick(e: React.MouseEvent, wardId: string, date: string, hasAssignment: boolean) {

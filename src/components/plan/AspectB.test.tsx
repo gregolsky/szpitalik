@@ -32,7 +32,7 @@ describe('AspectB', () => {
 
   it('shows doctor name in ward row for assigned day', () => {
     render(<AspectB plan={plan} unit={unit} onCellPick={vi.fn()} />)
-    expect(screen.getByText('Nowak J.')).toBeDefined()
+    expect(screen.getByText(/Nowak J\./)).toBeDefined()
   })
 
   it('single click opens doctor picker after delay', () => {
