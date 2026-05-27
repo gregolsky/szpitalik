@@ -160,6 +160,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .cell-selected { background: #bfdbfe !important; outline: 2px solid var(--primary); outline-offset: -2px; }
 .pin-indicator { font-size: 10px; margin-right: 2px; }
 .doctor-cell { max-width: 140px; }
+.duty-count { color: var(--text-muted); font-size: 11px; }
 .doctor-cell-inner { display: flex; align-items: center; gap: 4px; overflow: hidden; }
 .doctor-name-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row-block-btn { background: none; border: none; cursor: pointer; padding: 0 2px; font-size: 13px; line-height: 1; flex-shrink: 0; opacity: 0.7; }

@@ -28,8 +28,12 @@ export function AspectA({ plan, unit, prefsEditMode, onPrefsChange, onCellPick }
   }
 
   const assignedByDoctorDate = new Map<string, Assignment>()
+  const dutiesByDoctor = new Map<string, number>()
   for (const a of plan.assignments) {
-    if (a.doctorId) assignedByDoctorDate.set(`${a.doctorId}:${a.date}`, a)
+    if (a.doctorId) {
+      assignedByDoctorDate.set(`${a.doctorId}:${a.date}`, a)
+      dutiesByDoctor.set(a.doctorId, (dutiesByDoctor.get(a.doctorId) ?? 0) + 1)
+    }
   }
 
   const [picker, setPicker] = useState<{ doctorId: string; date: string; anchor: DOMRect } | null>(null)
@@ -113,7 +117,10 @@ export function AspectA({ plan, unit, prefsEditMode, onPrefsChange, onCellPick }
             <tr key={doc.id}>
               <td className="doctor-cell sticky-col">
                 <div className="doctor-cell-inner">
-                  <span className="doctor-name-text">{DOCTOR_TYPE_EMOJI[doc.type]} {doc.lastName} {doc.firstName[0]}.</span>
+                  <span className="doctor-name-text">
+                    {DOCTOR_TYPE_EMOJI[doc.type]} {doc.lastName} {doc.firstName[0]}.
+                    {(dutiesByDoctor.get(doc.id) ?? 0) > 0 && <span className="duty-count"> ({dutiesByDoctor.get(doc.id)})</span>}
+                  </span>
                   {prefsEditMode && (() => {
                     const allDates = dayNums.map((d) => `${plan.year}-${String(plan.month).padStart(2, '0')}-${String(d).padStart(2, '0')}`)
                     const allBlocked = allDates.every((date) => isExcluded(plan, doc.id, date))
