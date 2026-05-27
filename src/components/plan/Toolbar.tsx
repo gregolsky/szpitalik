@@ -53,18 +53,20 @@ export function Toolbar({
       <div className="toolbar-sep" />
 
       {!prefsEditMode && (
-        <button
-          className="btn btn-success"
-          onClick={hasAssignments ? onRegenerate : onGenerate}
-          disabled={gaRunning}
-        >
-          {gaRunning ? '⏳ Generowanie…' : hasAssignments ? '🔄 Regeneruj' : '⚡ Generuj'}
-        </button>
+        <>
+          <button
+            className="btn btn-success"
+            onClick={hasAssignments ? onRegenerate : onGenerate}
+            disabled={gaRunning}
+          >
+            {gaRunning ? '⏳ Generowanie…' : hasAssignments ? '🔄 Regeneruj' : '⚡ Generuj'}
+          </button>
+          <HelpIcon label="Pomoc — generowanie planu">
+            <p>Uruchamia algorytm genetyczny w tle i wypełnia sloty zgodnie z regułami i preferencjami lekarzy.</p>
+            <p>Regeneracja zachowuje komórki oznaczone jako przypięte (🔒).</p>
+          </HelpIcon>
+        </>
       )}
-      <HelpIcon label="Pomoc — generowanie planu">
-        <p>Uruchamia algorytm genetyczny w tle i wypełnia sloty zgodnie z regułami i preferencjami lekarzy.</p>
-        <p>Regeneracja zachowuje komórki oznaczone jako przypięte (🔒).</p>
-      </HelpIcon>
 
       <button
         className={`btn ${prefsEditMode ? 'btn-warning' : 'btn-secondary'}`}
@@ -73,7 +75,7 @@ export function Toolbar({
         {prefsEditMode ? '✏️ Preferencje lekarzy ON' : '✏️ Preferencje lekarzy'}
       </button>
       <HelpIcon label="Pomoc — preferencje lekarzy">
-        <p>Włącz, aby klikając komórki w siatce zaznaczyć niedostępność lub priorytet dyżuru dla danego lekarza w konkretnym dniu.</p>
+        <p>Włącz, aby klikając komórki w siatce zaznaczyć niedostępność danego lekarza w konkretnym dniu.</p>
         <p>Algorytm genetyczny uwzględni te preferencje przy generowaniu planu.</p>
       </HelpIcon>
 

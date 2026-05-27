@@ -21,6 +21,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 
 /* Layout */
 .main-content { max-width: 1400px; margin: 0 auto; padding: 1rem; }
+.main-content:has(.plan-page) { max-width: none; }
 .page { padding: 1rem 0; }
 .page-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
 .page-header h1 { flex: 1; font-size: 1.5rem; }
@@ -36,7 +37,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .nav-link.active, .nav-link:hover { color: white; background: rgba(255,255,255,0.15); }
 
 /* Buttons */
-.btn { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.85rem; border: 1px solid transparent; border-radius: 5px; font-size: 13px; cursor: pointer; font-family: inherit; transition: background 0.15s; white-space: nowrap; }
+.btn { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.85rem; border: 1px solid transparent; border-radius: 5px; font-size: 13px; cursor: pointer; font-family: inherit; transition: background 0.15s; white-space: nowrap; text-decoration: none; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-primary { background: var(--primary); color: white; }
 .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
@@ -248,8 +249,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 
 /* Help icon + popover */
 .help-icon-wrap { position: relative; display: inline-block; }
-.help-icon { background: none; border: 1px solid var(--border); border-radius: 50%; color: var(--text-muted); cursor: pointer; font-size: 11px; line-height: 1; padding: 0; width: 17px; height: 17px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; flex-shrink: 0; }
-.help-icon:hover, .help-icon:focus { color: var(--primary); border-color: var(--primary); outline: none; }
+.help-icon { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 15px; line-height: 1; padding: 0; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; flex-shrink: 0; opacity: 0.7; }
+.help-icon:hover, .help-icon:focus { color: var(--primary); opacity: 1; outline: none; }
 .help-popover { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.5); padding: 0.75rem 1rem; min-width: 230px; max-width: 300px; z-index: 1000; font-size: 13px; line-height: 1.55; color: var(--text); }
 .help-popover p { margin-bottom: 0.35rem; }
 .help-popover p:last-child { margin-bottom: 0; }
