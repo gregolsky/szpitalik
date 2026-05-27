@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Rule, DailyCountRule, DoctorType } from '@/types'
+import { HelpIcon } from '@/components/common/HelpIcon'
 import { DOCTOR_TYPE_LABEL } from '@/types'
 import { genId } from '@/utils/id'
 
@@ -39,7 +40,13 @@ export function RulesTab({ rules, defaultMaxDuties, allowConsecutiveDuties, onCh
 
   return (
     <div className="tab-content">
-      <h3>Ustawienia ogólne</h3>
+      <div className="tab-heading-row">
+        <h3>Ustawienia ogólne</h3>
+        <HelpIcon label="Pomoc — ustawienia i reguły">
+          <p>Limit dyżurów to domyślna maksymalna liczba dyżurów na lekarza w planie miesięcznym (można nadpisać dla każdego lekarza osobno w widoku planu).</p>
+          <p>Reguły dziennej liczby wymuszają minimalną obsadę danego typu lekarza w każdym dniu — algorytm genetyczny stara się je spełnić.</p>
+        </HelpIcon>
+      </div>
       <div className="form-group">
         <label>Domyślny limit dyżurów na osobę (na plan)</label>
         <input

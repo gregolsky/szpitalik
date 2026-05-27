@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Ward, DoctorType } from '@/types'
+import { HelpIcon } from '@/components/common/HelpIcon'
 import { DOCTOR_TYPE_LABEL } from '@/types'
 import { genId } from '@/utils/id'
 import { validateWard } from '@/utils/validators'
@@ -87,7 +88,13 @@ export function WardsTab({ wards, onChange }: WardsTabProps) {
 
   return (
     <div className="tab-content">
-      <h3>Piony</h3>
+      <div className="tab-heading-row">
+        <h3>Piony</h3>
+        <HelpIcon label="Pomoc — piony">
+          <p>Pion to nazwane stanowisko dyżurowe wypełniane każdego dnia dyżurowego (np. OIOM, ANES).</p>
+          <p>Skrót (2–4 litery) i emoji są widoczne w siatce planu. Możesz ograniczyć, które typy lekarzy mogą pełnić dyżur na danym pionie.</p>
+        </HelpIcon>
+      </div>
       <table className="data-table">
         <thead>
           <tr><th>Skrót</th><th>Nazwa</th><th>Emoji</th><th>Dozwolone typy</th><th></th></tr>

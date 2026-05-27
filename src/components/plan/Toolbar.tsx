@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { MonthPicker } from './MonthPicker'
+import { HelpIcon } from '@/components/common/HelpIcon'
 import type { Plan, Unit } from '@/types'
 
 type Aspect = 'A' | 'B'
@@ -60,6 +61,10 @@ export function Toolbar({
           {gaRunning ? '⏳ Generowanie…' : hasAssignments ? '🔄 Regeneruj' : '⚡ Generuj'}
         </button>
       )}
+      <HelpIcon label="Pomoc — generowanie planu">
+        <p>Uruchamia algorytm genetyczny w tle i wypełnia sloty zgodnie z regułami i preferencjami lekarzy.</p>
+        <p>Regeneracja zachowuje komórki oznaczone jako przypięte (🔒).</p>
+      </HelpIcon>
 
       <button
         className={`btn ${prefsEditMode ? 'btn-warning' : 'btn-secondary'}`}
@@ -67,6 +72,10 @@ export function Toolbar({
       >
         {prefsEditMode ? '✏️ Preferencje lekarzy ON' : '✏️ Preferencje lekarzy'}
       </button>
+      <HelpIcon label="Pomoc — preferencje lekarzy">
+        <p>Włącz, aby klikając komórki w siatce zaznaczyć niedostępność lub priorytet dyżuru dla danego lekarza w konkretnym dniu.</p>
+        <p>Algorytm genetyczny uwzględni te preferencje przy generowaniu planu.</p>
+      </HelpIcon>
 
       <div className="toolbar-spacer" />
 
@@ -84,6 +93,10 @@ export function Toolbar({
           🏥 Piony
         </button>
       </div>
+      <HelpIcon label="Pomoc — widoki planu">
+        <p><strong>Przypisania</strong>: rzędy to lekarze, kolumny to dni. Widać ile dyżurów ma każdy lekarz.</p>
+        <p><strong>Piony</strong>: rzędy to stanowiska dyżurowe (piony), kolumny to dni. Widać obsadę każdego pionu.</p>
+      </HelpIcon>
 
       <div className="toolbar-sep" />
 
@@ -102,15 +115,25 @@ export function Toolbar({
           </div>
         )}
       </div>
+      <HelpIcon label="Pomoc — eksport">
+        <p><strong>JSON</strong>: pełny snapshot planu do archiwum lub przesłania.</p>
+        <p><strong>Zaszyfrowany link</strong>: link chroniony hasłem — odbiorca musi je znać. Dane nie opuszczają przeglądarki.</p>
+      </HelpIcon>
 
       <button className="btn btn-secondary" onClick={() => fileRef.current?.click()}>
         📥 Import
       </button>
       <input ref={fileRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleFileChange} />
+      <HelpIcon label="Pomoc — import">
+        <p>Wczytuje plan z pliku JSON. Jeśli plan na ten miesiąc już istnieje, zostaniesz zapytany o nadpisanie lub zapisanie jako nowa wersja.</p>
+      </HelpIcon>
 
       <button className="btn btn-secondary" onClick={onPrint}>
         🖨️ Drukuj
       </button>
+      <HelpIcon label="Pomoc — drukowanie">
+        <p>Drukuje aktualny widok (pasek narzędzi jest ukryty). Działa zarówno dla Przypisań, jak i Pionów.</p>
+      </HelpIcon>
     </div>
   )
 }

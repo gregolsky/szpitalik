@@ -245,3 +245,13 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .violations-list li { padding: 0.1rem 0; font-size: 12px; }
 .violation-hard { color: #fca5a5; }
 .violation-soft { color: #fde68a; }
+
+/* Help icon + popover */
+.help-icon-wrap { position: relative; display: inline-block; }
+.help-icon { background: none; border: 1px solid var(--border); border-radius: 50%; color: var(--text-muted); cursor: pointer; font-size: 11px; line-height: 1; padding: 0; width: 17px; height: 17px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; flex-shrink: 0; }
+.help-icon:hover, .help-icon:focus { color: var(--primary); border-color: var(--primary); outline: none; }
+.help-popover { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.5); padding: 0.75rem 1rem; min-width: 230px; max-width: 300px; z-index: 1000; font-size: 13px; line-height: 1.55; color: var(--text); }
+.help-popover p { margin-bottom: 0.35rem; }
+.help-popover p:last-child { margin-bottom: 0; }
+.tab-heading-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+.tab-heading-row h3 { margin-bottom: 0; }

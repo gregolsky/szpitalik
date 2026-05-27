@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Doctor, DoctorType } from '@/types'
+import { HelpIcon } from '@/components/common/HelpIcon'
 import { DOCTOR_TYPE_LABEL, DOCTOR_TYPE_EMOJI } from '@/types'
 import { genId } from '@/utils/id'
 
@@ -57,7 +58,13 @@ export function DoctorsTab({ doctors, onChange }: DoctorsTabProps) {
 
   return (
     <div className="tab-content">
-      <h3>Lekarze</h3>
+      <div className="tab-heading-row">
+        <h3>Lekarze</h3>
+        <HelpIcon label="Pomoc — lekarze">
+          <p>Trzy typy: Rezydent 🩺, Starszy rezydent 🔬, Specjalista ⭐. Typ decyduje o tym, do jakich pionów lekarz może być przypisany (wg reguł i typów dozwolonych w pionie).</p>
+          <p>Lista jest sortowana alfabetycznie po nazwisku.</p>
+        </HelpIcon>
+      </div>
       <table className="data-table">
         <thead>
           <tr><th>Lekarz</th><th>Typ</th><th></th></tr>

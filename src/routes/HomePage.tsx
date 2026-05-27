@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { HelpIcon } from '@/components/common/HelpIcon'
 import { useUnits } from '@/state/UnitsContext'
 import { usePlans } from '@/state/PlansContext'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
@@ -124,6 +125,10 @@ export function HomePage() {
           <button className="btn btn-secondary" onClick={() => fileRef.current?.click()}>
             Import JSON
           </button>
+          <HelpIcon label="Pomoc — import JSON">
+            <p>Wczytuje plan lub pełny snapshot jednostki z pliku JSON.</p>
+            <p>Jeśli jednostka nie istnieje lokalnie, najpierw zaimportuj jej pełny snapshot. Konflikty (ten sam miesiąc) pozwolą wybrać nadpisanie lub zapisanie jako nowa wersja.</p>
+          </HelpIcon>
           <input
             ref={fileRef}
             type="file"
